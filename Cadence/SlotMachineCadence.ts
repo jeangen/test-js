@@ -36,11 +36,11 @@ type RoundsCadences = {
  * @param defaultCadence It's the cadence value when don't has anticipation.
  */
 const anticipatorConfig: AnticipatorConfig = {
-  columnSize: 5,
-  minToAnticipate: 2,
-  maxToAnticipate: 3,
+  columnSize: 6,
+  minToAnticipate: 1,
+  maxToAnticipate: 2,
   anticipateCadence: 2,
-  defaultCadence: 0.25,
+  defaultCadence: 1,
 };
 
 /**
@@ -62,7 +62,7 @@ const gameRounds: RoundsSymbols = {
   },
   roundThree: {
     specialSymbols: [
-      { column: 4, row: 2 },
+      { column: 1, row: 2 },
       { column: 4, row: 3 },
     ],
   },
@@ -82,7 +82,32 @@ const slotMachineCadences: RoundsCadences = { roundOne: [], roundTwo: [], roundT
  */
 function slotCadence(symbols: Array<SlotCoordinate>): SlotCadence {
   // Magic
-  return [];
+
+  const cadence: SlotCadence = [];
+
+  // Iterate through each column
+  for (let column = 0; column < anticipatorConfig.columnSize; column++) {
+    let columnCadence = anticipatorConfig.defaultCadence;
+
+    // Check if the current column has a special symbol
+    const hasSpecialSymbol = symbols.some(symbol => symbol.column === column);
+
+    // If there is a special symbol in the column, adjust the cadence
+    if (hasSpecialSymbol) {
+      const specialSymbolCount = symbols.filter(symbol => symbol.column === column).length;
+
+      // Check if the special symbol count is within the anticipation range
+      if (specialSymbolCount >= anticipatorConfig.minToAnticipate && specialSymbolCount <= anticipatorConfig.maxToAnticipate) {
+        // Set the anticipation cadence
+        columnCadence = anticipatorConfig.anticipateCadence;
+      }
+    }
+
+    // Add the calculated cadence for the column
+    cadence.push(columnCadence);
+  }
+
+  return cadence;
 }
 
 /**
